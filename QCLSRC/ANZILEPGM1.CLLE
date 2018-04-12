@@ -1,0 +1,31 @@
+/* ========================================================= */
+/* Module: ANZILEPGM1 - Analyze ILE programs - Main driver   */
+/* ========================================================= */
+             PGM        PARM(&LIBRARY)
+             DCL        &Library *CHAR  10
+             DCL        &MsgID   *CHAR   7
+             DCL        &MsgF    *CHAR  10
+             DCL        &MsgFLib *CHAR  10
+             DCL        &Msgdta  *CHAR 100
+             MONMSG     (CPF0000 MCH0000) EXEC(GOTO Error)
+             DSPOBJD    &Library/*ALL OBJTYPE(*PGM *SRVPGM) +
+                          OUTPUT(*OUTFILE) OUTFILE(QTEMP/QADSPOBJ)
+             DLTF       QTEMP/ANZILEMOD
+             MONMSG     CPF0000
+             DLTF       QTEMP/ANZILESVC
+             MONMSG     CPF0000
+             RUNSQLSTM  SRCFILE(QSQLSRC) SRCMBR(ANZILEPGM)
+             OVRDBF     QADSPOBJ  QTEMP/QADSPOBJ
+             OVRDBF     ANZILEMOD QTEMP/ANZILEMOD
+             OVRDBF     ANZILESVC QTEMP/ANZILESVC
+             CALLPRC    ANZILEPGM2
+             DLTOVR     *ALL
+             RETURN
+ Error:
+             RCVMSG     MSGTYPE(*LAST) MSGDTA(&MsgDta) MSGID(&MsgID) +
+                          MSGF(&MsgF) MSGFLIB(&MsgFLib)
+             MONMSG     (CPF0000 MCH0000)
+             SNDPGMMSG  MSGID(&MsgID) MSGF(&MsgFLib/&MsgF) MSGDTA(&MsgDta) +
+                          MSGTYPE(*ESCAPE)
+             MONMSG     (CPF0000 MCH0000)
+             ENDPGM
